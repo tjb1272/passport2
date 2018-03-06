@@ -1,73 +1,55 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
+const passport = require("passport");
+const db = require("../models");
+const { ensureAuthenticated } = require("../authorize/auth");
+const expressValidator = require('express-validator');
 
-const user = require('../models/user');
+const user = require('../models/User');
 
-//Register
+// Register
 router.get('/register', (req, res) => {
     res.render('register');
 });
+
+router.post('/register', (req, res) => {
+    db.User.create({
+        username: 'username',
+        password: 'password'
+      }).then(user => {
+        res.status(200).json({
+          msg: ('success_msg', 'You have successfully created your account.'),
+          user: user
+        });
+      });
+    });
 
 //Login
 router.get('/login', (req, res) => {
     res.render('login');
 });
 
-//Register User
-router.post('/register', (req, res) => {
-    var username = req.body.username;
-    var password = req.body.password;
-    var password2 = req.body.password2;
+router.post('/login', (req, res, next) => {
+    passport.authenticate('local', {
+    successRedirect: ('/dash', ('success_msg', 'You have successfully logged in.')),
+    failureRedirect: ('/login', ('error_msg', 'Login Incorrect, Please Re-try.')), 
+    })(req, res, next);
+});
 
-    //Validation
-    req.checkBody('username', 'Username Is Required').notEmpty();
-    req.checkBody('username', 'Username Is Email').isEmail();
-    req.checkBody('password', 'Password Is Required').notEmpty();
-    req.checkBody('password2', 'Password Does Not Match').equals(req.body.password);
+//Home
+router.get('/', (req, res) => {
+    res.render('/home');
+});
 
+//Logout
+router.get('/logout', (req, res) => {
+    req.logOut();
+    res.render('Logged out', ('success_msg', 'You have successfully logged out.'));
+});
 
-//Passport
-app.use(passport.initialize());
-app.use(passport.session());
-
-passport.serializeUser((user, done) => {
-    done(null, user._id);
+router.get("/protected", ensureAuthenticated, (req, res) => {
+    res.render('success_msg', 'You have successfully logged out.');
 });
   
-passport.deserializeUser((id, done) => {
-    user.findById(user, (err, user) => {
-        if (err || !user) return done(err, null);
-        done(null, user);
-    });
-});
-
-passport.use(new LocalStrategy({
-    username: 'email',
-    password: 'password',
-    passReqToCallback: true,
-    session: false
-    },
-function(req, username, password, done) {
-    user.findOne({ username: username }, (err, user) => {
-        if (err) { return done(err); }
-        if (!user) {
-            return done(null, false, ('error_msg', 'Username is incorrect'));
-        }
-        if (!user.validPassword(password)) {
-            return done(null, false, ('error_msg', 'Password is incorrect'));
-        }
-            return done(null, user);
-        })
-        if(user == null) {
-        user.create({
-        username: username,
-        password: password
-        }).then((user) => {
-            return done(null, user('success_msg', 'Your account has been successfully created.'));
-        }).catch((err) => {
-            return done(null, err('error_msg',));
-        })
-    }})
-)});
-
 module.exports = router;
+
