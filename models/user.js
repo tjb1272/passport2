@@ -1,69 +1,29 @@
-const express = require('express');
-const sqlite3 = require('sqlite3').verbose();
-const Sequelize = require('sequelize'); 
-const LocalStrategy = require('passport-local').Strategy;
-const bcrypt = require('bcryptjs')
-const app = express();
-const passport = require('passport');
-const router = express.Router();
+const bcrypt = require('bcryptjs');
 
-
-//Connection
-const sequelize = new Sequelize('Music', 'tjb1272', null, {
-  host: 'localhost',
-  dialect: 'sqlite',
-  storage: './Chinook_Sqlite_AutoIncrementPKs.sqlite'
-});
-
-//Model
-const Users = sequelize.define(
-    'users',
+module.exports = (sequelize, DataTypes) => {
+  let User = sequelize.define(
+    'User',
     {
-      UserId: {
-        type: Sequelize.INTEGER,
-        primaryKey: true,
-        autoIncrement: true
-      },
-        Username: Sequelize.STRING,
-        Password: Sequelize.STRING,
-        // Role: Sequelize.STRING,
-      },
+      name: DataTypes.STRING,
+      email: DataTypes.STRING,
+      username: DataTypes.STRING,
+      password: DataTypes.STRING,
+      password2: DataTypes.STRING,
+    },
     {
-      freezeTableName: true,
-      timestamps: false
+      hooks: {
+        beforeCreate: (User, options) => {
+          let salt = bcrypt.genSaltSync(10);
+          let hash = bcrypt.hashSync(User.password, salt);
+          User.password = hash;
+        }
+      }
     }
   );
- 
-const Artist = sequelize.define(
-  "Artist",
-  {
-    ArtistId: {
-      type: Sequelize.INTEGER,
-      autoIncrement: true,
-      primaryKey: true
-    },
-    Name: Sequelize.STRING
-  },
-  {
-    freezeTableName: true,
-    timestamps: false
-  }
-);
 
-const Album = sequelize.define(
-  "Album",
-  {
-    AlbumId: {
-      type: Sequelize.INTEGER,
-      autoIncrement: true,
-      primaryKey: true
-    },
-    Title: Sequelize.STRING
-  },
-  {
-    freezeTableName: true,
-    timestamps: false
-  }
-);
+  User.associate = (models) => {
+    models.User.hasMany(models.post);
+  };
 
-module.exports = router;
+  return User;
+};
