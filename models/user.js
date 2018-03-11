@@ -4,11 +4,8 @@ module.exports = (sequelize, DataTypes) => {
   let User = sequelize.define(
     'User',
     {
-      name: DataTypes.STRING,
-      email: DataTypes.STRING,
       username: DataTypes.STRING,
       password: DataTypes.STRING,
-      password2: DataTypes.STRING,
     },
     {
       hooks: {
@@ -22,7 +19,7 @@ module.exports = (sequelize, DataTypes) => {
   );
 
   User.associate = (models) => {
-    models.User.hasMany(models.post);
+    models.User.hasMany(models.Post);
   };
 
   return User;
