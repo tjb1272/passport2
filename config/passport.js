@@ -3,9 +3,9 @@ const passport = require('passport'),
   bcrypt = require('bcryptjs'),
   User = require('../models').User;
 
-module.exports = (passport) => {
+module.exports = function(passport) {
   passport.use(
-    new LocalStrategy((username, password, done) => {
+    new LocalStrategy(function(username, password, done) {
       User.find({ where: { username: username } })
         .then(user => {
           if (!user) {
@@ -32,7 +32,12 @@ module.exports = (passport) => {
     done(null, user.dataValues.id);
   });
 
-  passport.deserializeUser((id, done) => {
+  passport.serializeUser(function(user, done) {
+    console.log(user.dataValues.id);
+    done(null, user.dataValues.id);
+  });
+
+  passport.deserializeUser(function(id, done) {
     User.findById(id)
       .then(user => {
         if (user) {
