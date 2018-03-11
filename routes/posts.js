@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { ensureAuthenticated } = require('../authorize/auth');
-const post = require('../models').post;
+const post = require('../models').Post;
 
 router.post('/register', ensureAuthenticated, (req, res) => {
   post.create({ title: req.body.title, UserId: req.user.id }).then(result => {
@@ -11,6 +11,5 @@ router.post('/register', ensureAuthenticated, (req, res) => {
     });
   });
 });
-
 
 module.exports = router;
