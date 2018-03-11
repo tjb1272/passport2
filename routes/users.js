@@ -1,12 +1,9 @@
-const express = require("express");
+const express = require('express');
 const router = express.Router();
-const passport = require("passport");
-const db = require("../models");
-const { ensureAuthenticated } = require("../authorize/auth");
-const expressValidator = require('express-validator');
-
-const user = require('../models/User');
-
+const passport = require('passport');
+const db = require('../models');
+const { ensureAuthenticated } = require('../authorize/auth');
+    
 // Register
 router.get('/register', (req, res) => {
     res.render('register');
@@ -14,42 +11,57 @@ router.get('/register', (req, res) => {
 
 router.post('/register', (req, res) => {
     db.User.create({
-        username: 'username',
-        password: 'password'
-      }).then(user => {
+        username: username,
+        password: password
+    }).then(user => {
         res.status(200).json({
-          msg: ('success_msg', 'You have successfully created your account.'),
-          user: user
-        });
-      });
+        msg: 'You have successfully created your account.',
+        user: user
     });
+        console.log('registered')
+    });
+});
 
 //Login
 router.get('/login', (req, res) => {
     res.render('login');
 });
 
-router.post('/login', (req, res, next) => {
-    passport.authenticate('local', {
-    successRedirect: ('/dash', ('success_msg', 'You have successfully logged in.')),
-    failureRedirect: ('/login', ('error_msg', 'Login Incorrect, Please Re-try.')), 
-    })(req, res, next);
-});
+router.post('/login', passport.authenticate('local', {
+    successRedirect: '/User/success', 
+    failureRedirect: '/User/failure', 
+}));
 
 //Home
-router.get('/', (req, res) => {
-    res.render('/home');
+router.get('/dash', (req, res) => {
+    res.render('dash');
+    console.log('home');
 });
 
 //Logout
 router.get('/logout', (req, res) => {
+    res.render('logout');
+});
+
+router.post('/logout', (req, res) => {
     req.logOut();
-    res.render('Logged out', ('success_msg', 'You have successfully logged out.'));
+    res.send('You have successfully logged out.');
+    console.log('logged out');
 });
 
-router.get("/protected", ensureAuthenticated, (req, res) => {
-    res.render('success_msg', 'You have successfully logged out.');
+
+//Failure
+router.get('/failure', (req, res) => {
+    res.send('Try to log in again.');
 });
-  
+
+//Success
+router.get('/success', (req, res, next) => {
+    res.send(req.session.passport);
+});
+
+router.get('/protected', ensureAuthenticated, (req, res) => {
+    res.send('You have successfully logged in.');
+});
+
 module.exports = router;
-
