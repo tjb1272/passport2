@@ -3,14 +3,14 @@ const path = require('path');
 const cookieParser = require('cookie-parser');
 const bodyParser = require('body-parser');
 const handlebars = require('express-handlebars').create({ defaultLayout: 'main' });
-const flash = require('connect-flash');
-const session = require('express-session');
-const app = express();
+// const flash = require('connect-flash');
+const session = require('cookie-session');
 const passport = require('passport');
-const LocalStrategy = require('passport-local').Strategy;
-const sqlite3 = require('sqlite3').verbose();
+const sqlite = require('sqlite3')
 const Sequelize = require('sequelize');
+
 const port = process.env.PORT || 3000;
+const app = express();
 
 
 const models = require('./models');
@@ -24,7 +24,7 @@ app.set('view engine', 'handlebars');
 
 //BodyParsers
 app.use(bodyParser.json());
-app.use(require('connect-multiparty')());
+// app.use(require('connect-multiparty')());
 app.use(bodyParser.urlencoded({ extended: false}));
 app.use(cookieParser());
 
@@ -38,21 +38,19 @@ require("./config/passport")(passport);
 app.use(passport.initialize());
 app.use(passport.session());
 
-//Connect Flash
-app.use(flash());
+// // Connect Flash
+// app.use(flash());
 
-//Global Vars
-app.use((req, res, next) => {
-  res.locals.success_msg = req.flash('success_msg');
-  res.locals.error_msg = req.flash('error_msg');
-  res.locals.error = req.flash('err');
-  next();
-});
-
+// // Global Vars
+// app.use((req, res, next) => {
+//   res.locals.success_msg = req.flash('success_msg');
+//   res.locals.error_msg = req.flash('error_msg');
+//   res.locals.error = req.flash('err');
+//   next();
+// });
 
 
 //routes
-// app.use('/', routes);
 app.use('/users', users);
 app.use('/posts', posts);
 
