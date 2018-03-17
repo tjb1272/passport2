@@ -42,13 +42,9 @@ router.get('/dash', (req, res) => {
 
 //Logout
 router.get('/logout', (req, res) => {
-    res.render('logout');
-});
-
-router.post('/logout', (req, res) => {
-    req.send(application.destroySession);
     req.logOut();
     req.flash('success_msg', 'You are now logged out!');
+    res.redirect('dash');
     console.log('logged out');
 });
 
@@ -62,7 +58,6 @@ router.get('/failure', (req, res) => {
 
 //Success
 router.get('/success', (req, res, next) => {
-    res.send(req.session.passport);
     req.flash('success_msg', 'You are now logged in!');
     res.redirect('dash');
     console.log('log in success');
