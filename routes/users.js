@@ -3,6 +3,8 @@ const router = express.Router();
 const passport = require('passport');
 const db = require('../models');
 const { ensureAuthenticated } = require('../authorize/auth');
+const flash = require('connect-flash');
+
     
 // Register
 router.get('/register', (req, res) => {
@@ -11,31 +13,31 @@ router.get('/register', (req, res) => {
 
 router.post('/register', (req, res) => {
     db.User.create({
-        username: username,
-        password: password
-    }).then(user => {
-        res.status(200).json({
-        msg: 'You have successfully created your account.',
-        user: user
+        username: req.body.username,
+        password: req.body.password
     });
-        console.log('registered')
+        req.flash('success_msg', 'You have successfully registered your account!');
+        res.redirect('dash');
     });
-});
 
 //Login
 router.get('/login', (req, res) => {
     res.render('login');
 });
 
-router.post('/login', passport.authenticate('local', {
-    successRedirect: '/User/success', 
-    failureRedirect: '/User/failure', 
-}));
+router.post('/login', (req, res, next) => {
+    passport.authenticate('local', {  
+        successRedirect: '/users/success',
+        failureRedirect: '/users/failure'
+    })(req, res, next);
+    console.log('log in attempt');
+});
+
+
 
 //Home
 router.get('/dash', (req, res) => {
     res.render('dash');
-    console.log('home');
 });
 
 //Logout
@@ -44,20 +46,26 @@ router.get('/logout', (req, res) => {
 });
 
 router.post('/logout', (req, res) => {
+    req.send(application.destroySession);
     req.logOut();
-    res.send('You have successfully logged out.');
+    req.flash('success_msg', 'You are now logged out!');
     console.log('logged out');
 });
 
 
 //Failure
 router.get('/failure', (req, res) => {
-    res.send('Try to log in again.');
+    req.flash('error_msg', 'Something went wrong! Please try again.');
+    res.redirect('login');
+    console.log('log in failure');
 });
 
 //Success
 router.get('/success', (req, res, next) => {
     res.send(req.session.passport);
+    req.flash('success_msg', 'You are now logged in!');
+    res.redirect('dash');
+    console.log('log in success');
 });
 
 router.get('/protected', ensureAuthenticated, (req, res) => {
