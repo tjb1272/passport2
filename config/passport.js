@@ -27,25 +27,22 @@ module.exports = function(passport) {
     })
   );
 
-  passport.serializeUser((user, done) => {
-    console.log(user.dataValues.id);
-    done(null, user.dataValues.id);
-  });
-
-  passport.serializeUser(function(user, done) {
-    console.log(user.dataValues.id);
-    done(null, user.dataValues.id);
-  });
-
-  passport.deserializeUser(function(id, done) {
-    User.findById(id)
-      .then(user => {
-        if (user) {
-          done(null, user);
-        } else {
-          done(null, false);
-        }
-      })
-      .catch(err => done(err, false));
-  });
-};
+    //Serialize Sessions 
+    passport.serializeUser(function(user, done) {
+      console.log(user.dataValues.id);
+      done(null, user.dataValues.id);
+    });
+  
+    //DeSerialize Sessions
+    passport.deserializeUser(function(id, done) {
+      User.findById(id)
+        .then(user => {
+          if (user) {
+            done(null, user);
+          } else {
+            done(null, false);
+          }
+        })
+        .catch(err => done(err, false));
+    });
+  };
