@@ -3,7 +3,7 @@ const path = require('path');
 const cookieParser = require('cookie-parser');
 const bodyParser = require('body-parser');
 const handlebars = require('express-handlebars').create({ defaultLayout: 'main' });
-// const flash = require('connect-flash');
+const flash = require('connect-flash');
 const session = require('cookie-session');
 const passport = require('passport');
 const sqlite = require('sqlite3')
@@ -34,20 +34,20 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(session({ secret: 'secret' }));
 
 //Passport Init
-require("./config/passport")(passport);
+require('./config/passport')(passport);
 app.use(passport.initialize());
 app.use(passport.session());
 
-// // Connect Flash
-// app.use(flash());
+// Connect Flash
+app.use(flash());
 
-// // Global Vars
-// app.use((req, res, next) => {
-//   res.locals.success_msg = req.flash('success_msg');
-//   res.locals.error_msg = req.flash('error_msg');
-//   res.locals.error = req.flash('err');
-//   next();
-// });
+// Global Vars
+app.use((req, res, next) => {
+  res.locals.success_msg = req.flash('success_msg');
+  res.locals.error_msg = req.flash('error_msg');
+  res.locals.error = req.flash('err');
+  next();
+});
 
 
 //routes
